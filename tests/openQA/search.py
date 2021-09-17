@@ -1,5 +1,6 @@
 from testapi import *
 
+import foobar
 
 def run(self):
     assert_screen('openqa-logged-in')
