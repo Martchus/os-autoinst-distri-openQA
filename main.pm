@@ -20,6 +20,7 @@ sub load_update_tests() {
 }
 
 sub load_install_tests() {
+    loadtest "openQA/the_first_test_module.py";
     loadtest "install/boot.pm";
     loadtest "install/openqa_webui.pm";
     # for now when testing from git only tests the webui itself, not worker
@@ -57,6 +58,7 @@ sub load_openQA_tests() {
 
 sub load_python_tests() {
     loadtest "openQA/search.py";
+    loadtest "openQA/another_python_module.py";
 }
 
 sub load_shutdown() {
