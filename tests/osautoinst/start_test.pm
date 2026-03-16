@@ -17,18 +17,20 @@ EOF
     assert_script_run($_, $_ =~ m/openqa-cli/ ? (timeout => 300) : ()) foreach (split /\n/, $cmd);
 }
 
+my $ovmf_prefix = '/usr/share/qemu/ovmf-x86_64-ms-4m';
+
 sub full_run {
     # clone the latest "minimalx" job for the most recent Tumbleweed build with matching architecture
     my $openqa_url = get_var('OPENQA_HOST', 'https://openqa.opensuse.org');
     fetch_job_id(1, 'minimalx', 'NET', $openqa_url);
-    assert_script_run("retry -r 5 -e -- openqa-clone-job --show-progress --from $openqa_url \$job_id", timeout => 300);
+    assert_script_run("retry -r 5 -e -- openqa-clone-job --show-progress --from $openqa_url --parental-inheritance \$job_id UEFI_PFLASH_CODE=$ovmf_prefix-code.bin UEFI_PFLASH_VARS=$ovmf_prefix-vars.bin", timeout => 300);
 }
 
 sub full_run_multimachine {
     # clone the latest "ping_client" MM job for the most recent Tumbleweed build with matching architecture
     my $openqa_url = get_var('OPENQA_HOST', 'https://openqa.opensuse.org');
     fetch_job_id(1, 'ping_client', 'DVD', $openqa_url);
-    assert_script_run("retry -r 5 -e -- openqa-clone-job --show-progress --skip-chained-deps --from $openqa_url \$job_id", timeout => 600);
+    assert_script_run("retry -r 5 -e -- openqa-clone-job --show-progress --skip-chained-deps --from $openqa_url --parental-inheritance \$job_id UEFI_PFLASH_CODE=$ovmf_prefix-code.bin UEFI_PFLASH_VARS=$ovmf_prefix-vars.bin", timeout => 600);
 }
 
 sub example_run {
@@ -36,8 +38,7 @@ sub example_run {
     my $casedir = 'https://github.com/os-autoinst/os-autoinst-distri-example.git';
     my $needlesdir = '%%CASEDIR%%/needles';
     assert_script_run 'wget --retry-on-host-error https://raw.githubusercontent.com/os-autoinst/os-autoinst-distri-example/main/scenario-definitions.yaml';
-    assert_script_run "openqa-cli schedule --param-file SCENARIO_DEFINITIONS_YAML=scenario-definitions.yaml DISTRI=example VERSION=0 FLAVOR=DVD ARCH=$arch TEST=simple_boot _GROUP_ID=0 BUILD=test CASEDIR=$casedir NEEDLES_DIR=$needlesdir";
-
+    assert_script_run "openqa-cli schedule --param-file SCENARIO_DEFINITIONS_YAML=scenario-definitions.yaml DISTRI=example VERSION=0 FLAVOR=DVD ARCH=$arch TEST=simple_boot _GROUP_ID=0 BUILD=test CASEDIR=$casedir NEEDLES_DIR=$needlesdir UEFI_PFLASH_CODE=$ovmf_prefix-code.bin UEFI_PFLASH_VARS=$ovmf_prefix-vars.bin";
 }
 
 sub run {
